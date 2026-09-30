@@ -1,0 +1,342 @@
+```html
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisis Data - Kelompok 5 SMPN 1 Semarang</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN for Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons UMD -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.3);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 min-h-screen">
+
+  <!-- PRESENTATION OVERLAY -->
+  <div id="presentation-modal" class="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 md:p-12 hidden">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+      <div class="flex items-center gap-3">
+        <i data-lucide="bar-chart-2" class="w-8 h-8 text-cyan-400 animate-pulse"></i>
+        <span class="text-xl font-bold tracking-wider text-cyan-400">MODE PRESENTASI — KELOMPOK 5</span>
+      </div>
+      <button onclick="togglePresentation(false)" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
+        <i data-lucide="x" class="w-4 h-4"></i> Keluar (ESC)
+      </button>
+    </div>
+
+    <div class="my-auto max-w-4xl mx-auto text-center space-y-6">
+      <span id="pres-slide-badge" class="px-4 py-1 bg-cyan-950 text-cyan-400 border border-cyan-800 rounded-full text-sm font-semibold uppercase tracking-wider">
+        Slide 1 / 5
+      </span>
+      <h1 id="pres-slide-title" class="text-3xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 leading-tight">
+        ANALISIS DATA
+      </h1>
+      <h2 id="pres-slide-subtitle" class="text-xl md:text-2xl text-cyan-200 font-medium">
+        Proyek Informatika Kelompok 5 - Kelas 9A SMPN 1 Semarang
+      </h2>
+      <div class="p-8 bg-slate-900/80 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur">
+        <p id="pres-slide-content" class="text-lg md:text-2xl text-slate-300 leading-relaxed">
+          "Ubah Data Menjadi Informasi, Informasi Menjadi Insight."
+        </p>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center border-t border-slate-800 pt-4">
+      <button id="pres-prev-btn" onclick="changeSlide(-1)" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded-xl font-semibold flex items-center gap-2">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i> Sebelumnya
+      </button>
+      <div class="text-slate-400 text-sm hidden sm:block">
+        Gunakan Tombol Panah Keyboard (← / →)
+      </div>
+      <button id="pres-next-btn" onclick="changeSlide(1)" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 rounded-xl font-semibold flex items-center gap-2 text-white shadow-lg shadow-cyan-900/40">
+        Selanjutnya <i data-lucide="arrow-right" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- STICKY NAVBAR -->
+  <nav class="sticky top-0 z-40 backdrop-blur-md border-b bg-white/90 border-slate-200 dark:bg-slate-900/90 dark:border-slate-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo & Brand -->
+        <a href="#beranda" class="flex items-center gap-3">
+          <div class="p-2 bg-gradient-to-tr from-blue-600 to-cyan-500 rounded-xl text-white shadow-md shadow-blue-500/20">
+            <i data-lucide="activity" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500">
+              Analisis Data
+            </span>
+            <span class="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium dark:bg-blue-950 dark:text-blue-300">
+              SMPN 1 Semarang
+            </span>
+          </div>
+        </a>
+
+        <!-- Desktop Nav Links -->
+        <div class="hidden md:flex items-center space-x-1 lg:space-x-2">
+          <a href="#beranda" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Beranda</a>
+          <a href="#materi" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Materi</a>
+          <a href="#eksplorasi" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Eksplorasi Data</a>
+          <a href="#simulasi" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Simulasi</a>
+          <a href="#game" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Game</a>
+          <a href="#kalkulator" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Kalkulator</a>
+          <a href="#kesimpulan" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">Kesimpulan</a>
+        </div>
+
+        <!-- Actions -->
+        <div class="hidden md:flex items-center space-x-3">
+          <button onclick="togglePresentation(true)" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow-sm">
+            <i data-lucide="monitor" class="w-4 h-4"></i> Presentasi
+          </button>
+          <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-amber-400 dark:hover:bg-slate-700 transition">
+            <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+          </button>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="md:hidden flex items-center gap-2">
+          <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400">
+            <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+          </button>
+          <button onclick="toggleMobileMenu()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-b px-4 pt-2 pb-4 space-y-2 bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+      <a href="#beranda" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Beranda</a>
+      <a href="#materi" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Materi</a>
+      <a href="#eksplorasi" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Eksplorasi Data</a>
+      <a href="#simulasi" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Simulasi</a>
+      <a href="#game" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Game</a>
+      <a href="#kalkulator" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Kalkulator</a>
+      <a href="#kesimpulan" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-blue-50 dark:hover:bg-slate-800">Kesimpulan</a>
+      <button onclick="togglePresentation(true); toggleMobileMenu()" class="w-full mt-2 py-2 bg-indigo-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2">
+        <i data-lucide="monitor" class="w-4 h-4"></i> Mode Presentasi
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section id="beranda" class="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
+    <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-blue-500/20 via-cyan-400/20 to-indigo-500/10 blur-3xl rounded-full pointer-events-none -z-10"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <div class="lg:col-span-7 space-y-6">
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full text-xs font-bold tracking-wide uppercase">
+              Kelompok 5
+            </span>
+            <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-full text-xs font-bold tracking-wide uppercase">
+              Kelas 9A
+            </span>
+            <span class="px-3 py-1 bg-cyan-100 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 rounded-full text-xs font-bold tracking-wide uppercase">
+              SMPN 1 SEMARANG
+            </span>
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+            ANALISIS <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500">DATA</span>
+          </h1>
+
+          <p class="text-xl font-semibold text-blue-600 dark:text-cyan-400">
+            "Ubah Data Menjadi Informasi, Informasi Menjadi Insight."
+          </p>
+
+          <p class="text-base sm:text-lg leading-relaxed text-slate-600 dark:text-slate-300 max-w-2xl">
+            Pelajari bagaimana data dikumpulkan, diolah, divisualisasikan, dan dianalisis untuk menghasilkan informasi yang akurat dalam pengambilan keputusan kehidupan sehari-hari.
+          </p>
+
+          <div class="flex flex-wrap gap-4 pt-2">
+            <a href="#materi" class="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 flex items-center gap-2 transform hover:-translate-y-0.5 transition">
+              <i data-lucide="book-open" class="w-5 h-5"></i> Mulai Belajar
+            </a>
+            <a href="#eksplorasi" class="px-6 py-3.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl flex items-center gap-2 transition">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 text-cyan-500"></i> Jelajahi Data Real
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero Preview Card -->
+        <div class="lg:col-span-5 relative">
+          <div class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="text-xs font-semibold ml-2 text-slate-400">Dashboard Statistik Siswa 9A</span>
+              </div>
+              <i data-lucide="sparkles" class="w-5 h-5 text-amber-400 animate-spin" style="animation-duration: 6s;"></i>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="p-3 bg-blue-50 dark:bg-slate-800/80 rounded-xl border border-blue-100 dark:border-slate-700">
+                <div class="text-xs text-slate-500 dark:text-slate-400">Total Sampel</div>
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">10 Siswa</div>
+              </div>
+              <div class="p-3 bg-indigo-50 dark:bg-slate-800/80 rounded-xl border border-indigo-100 dark:border-slate-700">
+                <div class="text-xs text-slate-500 dark:text-slate-400">Rata-rata Nilai</div>
+                <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">83.9</div>
+              </div>
+            </div>
+
+            <div class="h-44 w-full relative">
+              <canvas id="hero-chart"></canvas>
+            </div>
+
+            <div class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400 italic">
+              Data Aktual: Pengaruh Jam Belajar terhadap Nilai Ujian Informatika
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- INTRODUCTION TO DATA ANALYSIS -->
+  <section class="py-16 border-y bg-slate-100/70 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-3xl font-extrabold tracking-tight">Apa Itu Analisis Data?</h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">
+          Analisis data adalah proses sistematis mengumpulkan, membersihkan, mengolah, dan merangkum fakta mentah menjadi informasi bermanfaat untuk mengambil keputusan secara tepat.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <div class="p-4 rounded-2xl bg-blue-500 text-white text-center shadow-md">
+          <div class="text-xs opacity-80 font-bold mb-1">Langkah 1</div>
+          <div class="font-black text-sm tracking-wide">DATA</div>
+          <div class="text-[10px] mt-1 opacity-90">Fakta Mentah</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-indigo-500 text-white text-center shadow-md">
+          <div class="text-xs opacity-80 font-bold mb-1">Langkah 2</div>
+          <div class="font-black text-sm tracking-wide">PENGOLAHAN</div>
+          <div class="text-[10px] mt-1 opacity-90">Pembersihan</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-purple-500 text-white text-center shadow-md">
+          <div class="text-xs opacity-80 font-bold mb-1">Langkah 3</div>
+          <div class="font-black text-sm tracking-wide">ANALISIS</div>
+          <div class="text-[10px] mt-1 opacity-90">Perhitungan</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-cyan-500 text-white text-center shadow-md">
+          <div class="text-xs opacity-80 font-bold mb-1">Langkah 4</div>
+          <div class="font-black text-sm tracking-wide">INFORMASI</div>
+          <div class="text-[10px] mt-1 opacity-90">Penyajian</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-teal-500 text-white text-center shadow-md">
+          <div class="text-xs opacity-80 font-bold mb-1">Langkah 5</div>
+          <div class="font-black text-sm tracking-wide">KESIMPULAN</div>
+          <div class="text-[10px] mt-1 opacity-90">Pemahaman</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-emerald-500 text-white text-center shadow-md">
+          <div class="text-xs opacity-80 font-bold mb-1">Langkah 6</div>
+          <div class="font-black text-sm tracking-wide">KEPUTUSAN</div>
+          <div class="text-[10px] mt-1 opacity-90">Tindakan</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATERI PEMBELAJARAN (ACCORDION) -->
+  <section id="materi" class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 rounded-full text-xs font-bold uppercase tracking-wider">
+          Kurikulum Informatika Kelas 9
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-3">
+          Materi Pembelajaran Analisis Data
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">
+          Pelajari 9 konsep utama analisis data secara interaktif dan mudah dipahami.
+        </p>
+      </div>
+
+      <div id="materi-accordion-container" class="space-y-4 max-w-4xl mx-auto">
+        <!-- Dynamically rendered via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- JENIS-JENIS DATA -->
+  <section class="py-20 border-y bg-blue-50/50 border-slate-200 dark:bg-slate-900/40 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-3xl font-extrabold tracking-tight">Eksplorasi Jenis-Jenis Data</h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">
+          Pilih kategori data di bawah untuk memahami definisi, karakteristik, dan penerapannya.
+        </p>
+
+        <!-- Category Tabs -->
+        <div class="flex justify-center gap-2 mt-6 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-xl max-w-md mx-auto">
+          <button onclick="switchDataTab('kuantitatif')" id="tab-btn-kuantitatif" class="flex-1 py-2 text-sm font-bold rounded-lg transition bg-blue-600 text-white shadow-md">Kuantitatif</button>
+          <button onclick="switchDataTab('kualitatif')" id="tab-btn-kualitatif" class="flex-1 py-2 text-sm font-bold rounded-lg transition text-slate-600 dark:text-slate-300">Kualitatif</button>
+          <button onclick="switchDataTab('primer')" id="tab-btn-primer" class="flex-1 py-2 text-sm font-bold rounded-lg transition text-slate-600 dark:text-slate-300">Primer</button>
+          <button onclick="switchDataTab('sekunder')" id="tab-btn-sekunder" class="flex-1 py-2 text-sm font-bold rounded-lg transition text-slate-600 dark:text-slate-300">Sekunder</button>
+        </div>
+      </div>
+
+      <!-- Content Cards -->
+      <div class="max-w-3xl mx-auto">
+        <div id="tab-content-kuantitatif" class="tab-content p-8 rounded-3xl border bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-xl">
+          <span class="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300 rounded-full text-xs font-bold">Data Angka</span>
+          <h3 class="text-2xl font-bold mt-3">Data Kuantitatif</h3>
+          <p class="mt-2 text-slate-600 dark:text-slate-300">Data berbentuk angka pasti yang dapat dihitung, diukur, dan diolah dengan operasi matematika.</p>
+          <div class="mt-4 space-y-2 text-sm">
+            <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl"><strong>Ciri-Ciri:</strong> Berupa angka, dapat dihitung rata-ratanya, bersifat objektif.</div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl"><strong>Contoh:</strong> Tinggi badan (165 cm), Nilai ujian (88), Jumlah siswa (32 orang).</div>
+          </div>
+        </div>
+
+        <div id="tab-content-kualita
